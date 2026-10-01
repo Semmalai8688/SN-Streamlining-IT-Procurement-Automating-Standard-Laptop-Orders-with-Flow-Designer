@@ -1,0 +1,64 @@
+public class PasswordResetProcess {
+    private String name;
+    private boolean active;
+    private boolean autoGenPassword;
+    private boolean applyToAllUsers;
+    private int minVerifications;
+    private boolean sendEmail;
+    private boolean unlockAccount;
+    private boolean passwordNeedsReset;
+    private boolean reset;
+    private String description;
+    private String credStore;
+
+    public PasswordResetProcess(String name, boolean active, boolean autoGenPassword, 
+                                boolean applyToAllUsers, int minVerifications, 
+                                boolean sendEmail, boolean unlockAccount, 
+                                boolean passwordNeedsReset, boolean reset, 
+                                String description, String credStore) {
+        this.name = name;
+        this.active = active;
+        this.autoGenPassword = autoGenPassword;
+        this.applyToAllUsers = applyToAllUsers;
+        this.minVerifications = minVerifications;
+        this.sendEmail = sendEmail;
+        this.unlockAccount = unlockAccount;
+        this.passwordNeedsReset = passwordNeedsReset;
+        this.reset = reset;
+        this.description = description;
+        this.credStore = credStore;
+    }
+
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
+
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+
+    public boolean isAutoGenPassword() { return autoGenPassword; }
+    public void setAutoGenPassword(boolean autoGenPassword) { this.autoGenPassword = autoGenPassword; }
+
+    public boolean isApplyToAllUsers() { return applyToAllUsers; }
+    public void setApplyToAllUsers(boolean applyToAllUsers) { this.applyToAllUsers = applyToAllUsers; }
+
+    public int getMinVerifications() { return minVerifications; }
+    public void setMinVerifications(int minVerifications) { this.minVerifications = minVerifications; }
+
+    public boolean isSendEmail() { return sendEmail; }
+    public void setSendEmail(boolean sendEmail) { this.sendEmail = sendEmail; }
+
+    public boolean isUnlockAccount() { return unlockAccount; }
+    public void setUnlockAccount(boolean unlockAccount) { this.unlockAccount = unlockAccount; }
+
+    public boolean isPasswordNeedsReset() { return passwordNeedsReset; }
+    public void setPasswordNeedsReset(boolean passwordNeedsReset) { this.passwordNeedsReset = passwordNeedsReset; }
+
+    public boolean isReset() { return reset; }
+    public void setReset(boolean reset) { this.reset = reset; }
+
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+
+    public String getCredStore() { return credStore; }
+    public void setCredStore(String credStore) { this.credStore = credStore; }
+}
