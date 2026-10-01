@@ -1,192 +1,73 @@
-# Implement Client Script & UI Policy (Incident)
+# Streaming IT Procurement: Automating Standard Laptop Orders for Flow Designers
 
 ## Problem Statement
-
-Incident records require consistent and accurate data entry for effective triage, routing, and resolution. Manual checks can result in incomplete, inconsistent, or incorrect data. This project uses ServiceNow UI Policies and Client Scripts to enforce conditional field behavior and validation directly at the user interface level.
+Manual procurement and fulfillment processes for standard hardware requests lead to delays, errors in task assignment, and unnecessary manual intervention. This project streamlines the IT hardware procurement process using ServiceNow Flow Designer to automate task creation, assignment, and status updates for standard laptop orders.
 
 ## Objective
-
-The objective of this project is to demonstrate how ServiceNow client-side controls can enforce data integrity on Incident records.
+The objective of this project is to demonstrate how ServiceNow Flow Designer, Service Catalog, and Catalog Tasks integrate to achieve seamless procurement automation.
 
 The implementation demonstrates how to:
-
-- Dynamically make fields mandatory
-- Auto-populate field values
-- Control field behavior
-- Prevent record submission when required conditions are not met
-- Validate Incident records before submission
+- Automatically trigger workflows upon catalog item submission.
+- Create and assign Catalog Tasks to the Hardware team.
+- Ensure automated approval routing before task assignment.
+- Maintain data integrity and visibility across procurement stages.
+- Automate order status updates based on task completion.
 
 ## Skills
-
-- Incident Management
-- UI Policy
-- UI Policy Actions
-- Client Scripts
-- Form Validation
+- Flow Designer
+- Service Catalog Management
+- Catalog Tasks & Approvals
+- IT Service Management (ITSM)
+- Automated Workflow Routing
 
 ## Implementation
 
-### Task 1: Create UI Policy on Incident
+### Task 1: Flow Creation & Trigger Configuration
+- *Flow Name:* Standard Laptop Order Flow
+- *Trigger:* Service Catalog (Catalog Item Submitted)
+- *Active:* True
+- *Description:* Triggers when a user places an order for a Standard Laptop catalog item.
 
-**UI Policy Name:** `High Impact Control`
+### Task 2: Approval Routing
+- *Action:* Ask For Approval
+- *Item:* Catalog Request Item (RITM)
+- *Rules:* Approve if Manager Approval is granted; Reject if Manager denies.
 
-**Configuration:**
+### Task 3: Catalog Task Creation & Assignment
+- *Action:* Create Catalog Task
+- *Table:* Catalog Task (sc_task)
+- *Assignment Group:* Hardware Team
+- *Priority:* Medium
+- *Short Description:* Setup and configure standard laptop for user.
 
-- Table: `Incident`
-- Active: `true`
-- Field: `Impact`
-- Operator: `is`
-- Value: `1 – High`
-- UI Policy Action: `Assignment group`
-- Mandatory: Checked
-- Reverse if false: `true`
-
-This policy is triggered when the Incident Impact is set to High.
-
-### Task 2: Create UI Policy Action – Urgency
-
-Create a UI Policy Action under the **High Impact Control** policy.
-
-**Configuration:**
-
-- Field name: `Urgency`
-- Read-only: `true`
-- Visible: Leave unchanged
-
-When Impact is High, the Urgency field becomes read-only.
-
-### Task 3: Create onChange Client Script
-
-**Name:** `Auto set urgency for high impact`
-
-**Configuration:**
-
-- Table: `Incident`
-- Type: `onChange`
-- Field name: `Impact`
-- Active: `true`
-
-**Script:**
-
-```javascript
-function onChange(control, oldValue, newValue, isLoading) {
-    if (isLoading || newValue == '') {
-        return;
-    }
-
-    if (newValue == '1') {
-        g_form.setValue('urgency', '1');
-        g_form.addInfoMessage('Urgency set to High for High impact incident.');
-    }
-}
-```
-
-When Impact is changed to High, the script automatically sets Urgency to High.
-
-### Task 4: Create onSubmit Client Script
-
-**Name:** `Prevent save if Assigned To missing`
-
-**Configuration:**
-
-- Table: `Incident`
-- Type: `onSubmit`
-- Active: `true`
-
-**Script:**
-
-```javascript
-function onSubmit() {
-    if (g_form.getValue('impact') == '1' &&
-        g_form.getValue('assigned_to') == '') {
-        g_form.showErrorBox(
-            'assigned_to',
-            'Assigned To is mandatory for High impact incidents.'
-        );
-        return false;
-    }
-
-    return true;
-}
-```
-
-This script prevents an Incident from being saved when Impact is High and Assigned To is empty.
-
-### Task 5: Create onCellEdit Client Script
-
-**Name:** `Prevent state change via list edit`
-
-**Configuration:**
-
-- Table: `Incident`
-- Type: `onCellEdit`
-- Field name: `State`
-- Active: `true`
-
-**Script:**
-
-```javascript
-function onCellEdit(sysIDs, table, oldValues, newValue, callback) {
-    alert('State cannot be updated using list editing. Please open the Incident.');
-    callback(false);
-}
-```
-
-This prevents users from changing the State field directly from the Incident list.
+### Task 4: State & Status Updates
+- *Action:* Update Record
+- *Logic:* Automatically update RITM state to "Complete" upon task fulfillment.
 
 ## Testing
 
-### Test 1: Mandatory Enforcement
+### Test 1: Successful Order & Task Creation
+1. Open Service Catalog -> Select *Standard Laptop*.
+2. Submit the Request.
+3. Verify that the Flow Flow Designer triggers successfully.
+4. Check that a Catalog Task is automatically created and assigned to the *Hardware Team*.
 
-1. Open **Incident → Create New**.
-2. Set Impact to **High**.
-3. Leave Assigned To empty.
-4. Click Submit.
-5. Verify that the Incident is not saved and an error message is displayed.
+### Test 2: Approval Workflow Verification
+1. Place a new Standard Laptop order.
+2. Verify RITM status is set to *Waiting for Approval*.
+3. Approve the request as the Manager.
+4. Verify that the Catalog Task is generated only after approval.
 
-### Test 2: Successful Save
-
-1. Fill in the Assigned To field.
-2. Click Submit.
-3. Verify that the Incident is saved successfully.
-4. Confirm that urgency auto-setting, read-only behavior, and State restrictions work correctly.
-
-### Test 3: Reverse Condition
-
-1. Open an Incident where Impact is High.
-2. Change Impact from High to Medium.
-3. Verify that Assigned To is no longer mandatory.
-4. Verify that Urgency becomes editable.
-5. Save the record.
-
-### Test 4: List Edit Blocking
-
-1. Go to **Incident → All**.
-2. Double-click the State field.
-3. Verify that an alert appears.
-4. Confirm that the State value remains unchanged.
-
-### Test 5: Form-Based Update
-
-1. Open an Incident record.
-2. Change the State field from the Incident form.
-3. Click Update.
-4. Verify that the State change is saved successfully.
+### Test 3: Automated Fulfillment Closure
+1. Open the created Catalog Task.
+2. Mark the Task State as *Closed Complete*.
+3. Verify that the parent RITM automatically updates to *Closed Complete*.
 
 ## Expected Results
-
-- Assignment-related mandatory behavior is enforced for high-impact incidents.
-- Urgency is automatically set to High when Impact is High.
-- Urgency becomes read-only when the UI Policy condition is met.
-- Incidents cannot be saved without Assigned To when Impact is High.
-- Direct State changes through list editing are blocked.
-- State changes made through the Incident form are allowed.
-- UI Policy behavior is reversed when the Impact condition is no longer true.
+- Automated workflow triggers seamlessly without manual intervention upon catalog submission.
+- Approvals are routed correctly before task generation.
+- Tasks are accurately created and assigned to the Hardware Team.
+- Order state changes synchronously reflect task status.
 
 ## Conclusion
-
-The **Implement Client Script & UI Policy (Incident)** project demonstrates how UI Policies and Client Scripts can work together to enforce dynamic field behavior, automate updates, and prevent incorrect data submission on Incident forms. The use of `onChange`, `onSubmit`, and `onCellEdit` Client Scripts together with UI Policy actions helps maintain consistent and valid Incident data while improving form usability.
-
-## Project Reference
-
-This README is based on the provided project document, **Implement Client Script & UI Policy (Incident)**. fileciteturn0file0L2-L18
+The *Streaming IT Procurement* project successfully demonstrates end-to-end automation of standard laptop procurement using ServiceNow Flow Designer. By replacing manual handoffs with automated task assignment and approval routing, this solution improves processing efficiency, reduces fulfillment errors, and ensures full operational transparency.
